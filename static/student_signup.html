@@ -1,12 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <title>Student Sign Up</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
+
 </head>
 <body>
-    
+  <div class="login-box">
+    <h1>Student Sign Up</h1>
+    <form>
+      <div class="textbox">
+        <i class="fa fa-user" aria-hidden="true"></i>
+        <input type="text" placeholder="Username" name="student_username">
+      </div>
+      
+      <div class="textbox">
+        <i class="fa fa-envelope" aria-hidden="true"></i>
+        <input type="email" placeholder="Email" name="student_email">
+      </div>
+
+      <div class="textbox">
+        <i class="fa fa-lock" aria-hidden="true"></i>
+        <input type="password" placeholder="Password" name="student_password">
+      </div>
+      
+      <div class="textbox">
+        <i class="fa fa-lock" aria-hidden="true"></i>
+        <input type="password" placeholder="Confirm Password" name="student_confirm_Password">
+      </div>
+
+      <input type="submit" class="btn" value="Sign Up">
+    </form>
+  </div>
 </body>
 </html>
