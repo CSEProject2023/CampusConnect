@@ -7,12 +7,12 @@
   <title>Student Sign Up</title>
   <link rel="stylesheet" type="text/css" href="style/student_signup.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
-
+<script src="../alerts.js"></script>
 </head>
 <body>
   <div class="login-box">
     <h1>Student Sign Up</h1>
-    <form>
+    <form action="/student_signup" method="post">
       <div class="textbox">
         <i class="fa fa-user" aria-hidden="true"></i>
         <input type="text" placeholder="Username" name="student_username">
@@ -25,16 +25,29 @@
 
       <div class="textbox">
         <i class="fa fa-lock" aria-hidden="true"></i>
-        <input type="password" placeholder="Password" name="student_password">
+        <input type="password" placeholder="Password" name="student_password" id="spassword">
       </div>
       
       <div class="textbox">
         <i class="fa fa-lock" aria-hidden="true"></i>
-        <input type="password" placeholder="Confirm Password" name="student_confirm_Password">
+        <input type="password" placeholder="Confirm Password" name="student_confirm_Password" id="sconfirmPassword">
       </div>
-
+      <span id="errorMessage" style="color: red; display: none;">Passwords do not match!</span>
       <input type="submit" class="btn" value="Sign Up">
     </form>
   </div>
+  <script>
+  const password = document.querySelector('#spassword');
+const confirmPassword = document.querySelector('#sconfirmPassword');
+const errorMessage = document.querySelector('#errorMessage');
+
+  confirmPassword.addEventListener("input", function() {
+    if (password.value !== confirmPassword.value) {
+      errorMessage.style.display = "block";
+    } else {
+      errorMessage.style.display = "none";
+    }
+  });
+</script>
 </body>
 </html>
