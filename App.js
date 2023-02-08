@@ -52,17 +52,16 @@ app.post('/student_signup',function(req,res,next){
 app.post('/student_login',function(req,res,next){
   var email = req.body.email;
   var password = req.body.pass;
-  console.log("pwd",password);
-  console.log("email",email);
   pool.query(`select password from user_credentials where email_id=(?)`,[email],function(err,result,fields){
     if (err) {
         return console.log(err);
     }
     else if(result[0]['password']==password){
-      return res.sendFile(__dirname+'/static/studentprofile.html');}
+      return res.sendFile(__dirname+'/static/student_profile.html');}
     else{
-        
-        return res.sendFile(__dirname+'/static/login.html');}
+        //errorMessage.style.display='block';
+        return res.status(401).json({ error: 'Incorrect username or password' });
+    }
 })
 });
 app.listen(3000);

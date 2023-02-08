@@ -9,12 +9,13 @@
   <link rel="stylesheet" type="text/css" href="style/student_login.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css"
     integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
-
+<script src="/App.js"></script>
 </head>
 
 <body>
   <div class="login-box">
     <h1>Student Login</h1>
+    <div id="login_error" style="color: red;display: none;">Email/password is wrong</div>
     <form action="/student_login" method="post">
       <div class="textbox">
         <i class="fa fa-user" aria-hidden="true"></i>
@@ -26,9 +27,28 @@
         <input type="password" placeholder="Password" name="pass">
       </div>
 
-      <input type="submit" class="btn" value="Sign In">
+      <input type="submit" class="btn" value="Sign In" id="submit-button">
     </form>
   </div>
+  <script>
+      const submitButton = document.querySelector('#submit-button');
+      const errorMessage = document.querySelector('#login_error');
+
+      submitButton.addEventListener('click', () => {
+        const username = document.querySelector('#email').value;
+        const password = document.querySelector('#pass').value;
+
+        fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        })
+          .catch(error => {
+            // Handle error
+            errorMessage.innerHTML = `Error: ${error.message}`;
+          });
+      });
+    </script>
 </body>
 
 </html>
