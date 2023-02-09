@@ -1,0 +1,67 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+header {
+  padding: 20px;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 20px;
+}
+
+.student-nav a {
+  font-size: 16px;
+  text-decoration: none;
+  color: black;
+}
+
+main {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 20px;
+}
+
+.student-profile {
+  text-align: center;
+  width: 25%;
+}
+
+.student-profile img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
+.student-content {
+  width: 75%;
+}
+
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .student-profile {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .student-content {
+    width: 100%;
+  }
+}

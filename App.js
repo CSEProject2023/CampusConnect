@@ -1,5 +1,6 @@
 var express = require('express')
 var mysql = require("mysql")
+const PDFDocument = require('pdfkit');
 var path = require('path')
 var app = new express();
 var bodyParser = require('body-parser');
@@ -52,16 +53,48 @@ app.post('/student_signup',function(req,res,next){
 app.post('/student_login',function(req,res,next){
   var email = req.body.email;
   var password = req.body.pass;
-  pool.query(`select password from user_credentials where email_id=(?)`,[email],function(err,result,fields){
+  pool.query(`select * from user_credentials where email_id=(?) and password=(?)`,[email,password],function(err,result,fields){
     if (err) {
         return console.log(err);
     }
-    else if(result[0]['password']==password){
-      return res.sendFile(__dirname+'/static/student_profile.html');}
+    else if(result.length > 0){
+      return res.redirect('/student_profile');
+    }
     else{
-        //errorMessage.style.display='block';
-        return res.status(401).json({ error: 'Incorrect username or password' });
+        res.status(401).json({ error: 'Incorrect username or password' });
+        return res.sendFile(__dirname+'/static/student_login.html');
     }
 })
 });
+app.get('/student_profile',function (req, res) {
+  res.sendFile(__dirname+'/static/student_profile.html')
+})
+
+app.get('/generate-pdf', (req, res) => {
+
+  const query = 'SELECT * FROM table_name';
+
+  connection.query(query, (error, results) => {
+    if (error) throw error;
+    
+    const doc = new PDFDocument();
+    
+    res.setHeader('Content-Type', 'application/pdf');
+
+    res.setHeader('Content-Disposition', 'attachment; filename="data.pdf"');
+
+    doc.pipe(res);
+
+    results.forEach(row => {
+      Object.keys(row).forEach(key => {
+        doc.text(`${key}: ${row[key]}`);
+      });
+      doc.addPage();
+    });
+    
+    // End the PDF data stream
+    doc.end();
+  });
+});
+
 app.listen(3000);
