@@ -54,4 +54,8 @@ body{
     cursor: pointer;
     margin: 12px 0;
   }
-  
+  .forgot{
+    float: right;
+    color: #000000;
+    font-size: 20px;
+  }
