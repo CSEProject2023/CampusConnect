@@ -6,11 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style/student_profile.css">
-    <script src="js/student_profile.js
-    "></script>
+    <script src="js/student_profile.js"></script>
 </head>
 <body>
-    <h1>Student Profile</h1>
+    <div id="mySidebar" class="sidebar">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <a href="#">Profile</a>
+  <a href="#"></a>
+  <a href="#">Comments</a>
+  <a href="#">Logout</a>
+</div>
+
+<div id="main">
+  <button class="openbtn" onclick="openNav()">&#9776; Open Sidebar</button>
+  <h2>Collapsed Sidebar</h2>
+  <p>Content...</p>
+  <h1>Student Profile</h1>
+    <div>Hello <%= name %></div>
     <a href="/generate-pdf">Download PDF</a>
+</div>  
+    
 </body>
 </html>
