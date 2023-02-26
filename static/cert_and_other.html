@@ -10,7 +10,19 @@
   <body>
     <form>
       <label for="skills">Skills:</label>
-      <input type="text" id="skills" name="skills">
+      <select id="skills" name="skills">
+        <option value="">Select a skill...</option>
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+        <option value="javascript">JavaScript</option>
+        <option value="react">React</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="angular">Angular</option>
+        <option value="node">Node.js</option>
+        <option value="mongodb">MongoDB</option>
+        <option value="mysql">MySQL</option>
+      </select>
       <br><br>
       <label for="projects">Projects:</label>
       <input type="text" id="projects" name="projects">
@@ -22,7 +34,7 @@
       <input type="text" id="internships" name="internships">
       <br><br>
       <a href="./educational_details.html"><button name= "cprev" type="button">Previous</button></a>
-      <button type="submit" id="submit-btn" name="submit">Submit</button>
+      <button type="button" id="ce_btn" name="ce_btn">Next</button>
     </form>
   </body>
 </html>

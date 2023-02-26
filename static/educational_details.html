@@ -13,12 +13,22 @@
       <label for="regno">Reg Number:</label>
       <input type="text" id="regno" name="reg_no"><br><br>
 
-      <h2>University Details </h2>
+      <h2>UG Details </h2>
       <label for="university_name">University Name:</label>
       <input type="text" id="univ_name" name="uni_name">
       <br>
       <label for="univ_course">Course:</label>
       <input type="text" id="univ_course" name="univ_course">
+      <br>
+      <label for="ug_board">Board of Education:</label>
+      <input type="text" id="ug_board" name="ug_board">
+      <br>
+      <div class="radio-btns">
+        <input type="radio" id="autonomous" name="autonomous" value="autonomous">
+        <label for="autonomous">Autonomous</label><br>
+        <input type="radio" id="JNTUK" name="JNTUK" value="JNTUK">
+        <label for="JNTUK">JNTUK</label><br>
+      </div>
       <br>
       <label for="univ_start_year">Start Year:</label>
       <input type="number" id="univ_start_year" name="univ_start_year" min="1900" max="2023">
@@ -29,12 +39,15 @@
       <label for="univ_cgpa">CGPA:</label>
       <input type="text" id="univ_cgpa" name="univ_cgpa">
       <br>
-      <h2>College / Diploma Details </h2>
+      <h2>Intermediate / Diploma Details </h2>
       <label for="clg_name">College Name:</label>
       <input type="text" id="clg_name" name="clg_name">
       <br>
       <label for="clg_course">Course:</label>
       <input type="text" id="clg_course" name="clg_course">
+      <br>
+      <label for="clg_board">Board of Education:</label>
+      <input type="text" id="clg_board" name="clg_board">
       <br>
       <label for="clg_start_year">Start Year:</label>
       <input type="number" id="clg_start_year" name="clg_start_year" min="1900" max="2023">
@@ -45,19 +58,19 @@
       <label for="clg_cgpa">CGPA:</label>
       <input type="text" id="clg_cgpa" name="clg_cgpa">
       
-      <h2>School Details</h2>
+      <h2>SSC Details</h2>
       <label for="school_name">School Name:</label>
       <input type="text" id="school_name" name="scl_name">
       <br>
-      <label for="school_start_year">Start Year:</label>
-      <input type="number" id="school_start_year" name="scl_start_year" min="1900" max="2023">
-      <br>
-      <label for="school_end_year">End Year:</label>
-      <input type="number" id="school_end_year" name="scl_end_year" min="1900" max="2023">
+      <label for="yop">Year of Passing:</label>
+      <input type="number" id="yop" name="yop" min="1900" max="2023">
       <br>
       <label for="school_cgpa">CGPA:</label>
       <input type="text" id="school_cgpa" name="scl_cgpa">
-      <br><br>
+      <br>
+      <label for="scl_board">Board of Education:</label>
+      <input type="text" id="scl_board" name="scl_board">
+      <br>
       <a href="./personal_details.html"><button name= "eprev" type="button">Previous</button></a>
       <a href="./cert_and_other.html"><button name="enxt" type="button">Next</button></a>
     </form>
