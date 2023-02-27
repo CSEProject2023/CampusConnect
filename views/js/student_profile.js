@@ -29,4 +29,21 @@ nextButton.addEventListener("click", function() {
   }
 });
 
+  function showFirstPage(){
+    document.getElementById('first').style.display='block';
+    document.getElementById('second').style.display='none';
+    document.getElementById('third').style.display='none';
+  }
+  function showSecondPage(){
+    console.log("Hello");
+    document.getElementById('first').style.display='none';
+    document.getElementById('second').style.display='block';
+    document.getElementById('third').style.display='none';
+  }
+  function showThirdPage(){
+    document.getElementById('first').style.display='none';
+    document.getElementById('second').style.display='none';
+    document.getElementById('third').style.display='block';
+  }
+
 

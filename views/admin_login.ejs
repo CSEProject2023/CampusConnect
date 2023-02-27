@@ -14,6 +14,7 @@
 <body>
   <div class="login-box">
     <h1>Admin Login</h1>
+    <form action="/admin_login" method="post">
     <div class="textbox">
       <i class="fa fa-user" aria-hidden="true"></i>
       <input type="text" placeholder="Username" name="admin_user">
@@ -24,7 +25,9 @@
     </div>
     <input type="submit" class="btn" value="Sign In">
     <a class="forgot" href="#">Forgot Password</a>
+    </form>
   </div>
+
    <% if (togglePopup) { %>
     <script>
       function togglePopup() {

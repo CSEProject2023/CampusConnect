@@ -8,8 +8,9 @@ const crypto = require('crypto');
 const uuidv4 = require('uuid').v4;
 var bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const mime = require('mime');
 var isAuthenticated = false;
-var user ;
+var user, admin ;
 
 
 
@@ -36,7 +37,12 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24, // 1 day
   },
 }));
+app.use('/js', function(req, res, next) {
+  res.type('text/javascript');
+  next();
+});
 
+app.use(express.static(path.join(__dirname, 'views/js')));
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(express.json())
@@ -62,8 +68,17 @@ app.get('/student_profile',function (req, res) {
     res.render('student_login', { togglePopup : true, message: 'You need to login first' });
   }
   else{
-  console.log("in profile route")
   res.render('student_profile', { name:user[0]["username"]});
+  return;
+  }
+})
+
+app.get('/admin_profile',function (req, res) {
+  if(!isAuthenticated){
+    res.render('admin_login', { togglePopup : true, message: 'You need to login first' });
+  }
+  else{
+  res.render('admin_profile', { name:admin[0]["username"]});
   return;
   }
 })
@@ -85,11 +100,24 @@ app.post('/student_signup',function(req,res,next){
     var email=req.body.student_email;
     var pwd=req.body.student_password;
     pool.query(`insert into user_credentials (email_id,username
-    ,password)values (?,?,?)`,[email,userName,pwd],function(err,result){
+    ,password)values (?,?,?)`,[email,username,pwd],function(err,result){
       if(err){
         return console.log(err);
       }
       return res.redirect('/student_login');
+    })
+});
+
+app.post('/admin_signup',function(req,res,next){
+   var username=req.body.admin_username;
+    var email=req.body.admin_email;
+    var pwd=req.body.admin_password;
+    pool.query(`insert into admin_credentials (email_id,username
+    ,password)values (?,?,?)`,[email,username,pwd],function(err,result){
+      if(err){
+        return console.log(err);
+      }
+      return res.redirect('/admin_login');
     })
 });
 
@@ -110,6 +138,28 @@ app.post('/student_login',function(req,res,next){
   }
     else{
        res.render('student_login', { togglePopup : true, message: 'Invalid username or password' });
+      return;
+    }
+})
+});
+
+app.post('/admin_login',function(req,res,next){
+  var email = req.body.admin_user;
+  var password = req.body.admin_password;
+  pool.query(`select * from admin_credentials where email_id=(?) and password=(?)`,[email,password],function(err,result,fields){
+    if (err) {
+        return console.log(err);
+    }
+    else if(result.length > 0){
+      const sessionId = uuidv4();
+      sessions[sessionId]={email,userId:1}
+      console.log(sessionId);
+       admin = result;
+       isAuthenticated=true;
+      res.redirect('/admin_profile');
+  }
+    else{
+       res.render('admin_login', { togglePopup : true, message: 'Invalid username or password' });
       return;
     }
 })

@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style/student_profile.css">
-    <script src="js/student_profile.js"></script>
+    
+    
 </head>
 <body>
     <div id="mySidebar" class="sidebar">
@@ -21,12 +20,169 @@
 <div class="navbar">
   <button class="openbtn" onclick="openNav()">&#9776;  CampusConnect</button>
   </div>
-  <h2>Collapsed Sidebar</h2>
-  <p>Content...</p>
   <h1>Student Profile</h1>
     <div>Hello <%= name %></div>
-    <a href="/generate-pdf">Download PDF</a>
+    <form action="/saveDetails" method="post">
+      <div id="first">
+      <label for="fname">First Name:</label>
+      <input type="text" id="fname" name="fname"><br><br>
+      
+      <label for="lname">Last Name:</label>
+      <input type="text" id="lname" name="lname"><br><br>
+
+      <label for="dob">Date Of Birth:</label>
+      <input type="date" id="dob" name="dob"><br><br>
+      
+      <label for="gender">Gender:</label><br>
+      <div class="radio-buttons">
+        <input type="radio" id="male" name="gender" value="male">
+        <label for="male">Male</label><br>
+        <input type="radio" id="female" name="gender" value="female">
+        <label for="female">Female</label><br>
+        <input type="radio" id="other" name="gender" value="other">
+        <label for="other">Other</label><br>
+      </div>
+      <label for="adhaar">Aadhaar Number:</label>
+      <input type="text" id="aadhaar" name="aadhaar" maxlength="12"><br><br>
+
+      <label for="fathername">Father Name:</label>
+      <input type="text" id="fathername" name="father_name"><br><br>
+
+      <label for="mothername">Mother Name:</label>
+      <input type="text" id="mothername" name="mother_name"><br><br>
+
+      <label for="phone"> Parent/Guardian Phone Number:</label>
+      <input type="tel" id="phone" name="parent_phone" maxlength="10"><br><br>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email"><br><br>
+      
+      <label for="phone">Phone Number:</label>
+      <input type="tel" id="phone" name="phone" maxlength="10"><br><br>
+
+      <label for="address">Address:</label>
+      <textarea id="address" name="address" rows="5" cols="50">Enter your Address here</textarea>
+      <br><br>
+
+      <button name= "next" type="button" onclick="showSecondPage()">Next</button>
+      </div>
+      <div id="second" style="display: none;">
+          <label for="regno">Reg Number:</label>
+      <input type="text" id="regno" name="reg_no"><br><br>
+
+      <h2>UG Details </h2>
+      <label for="university_name">University Name:</label>
+      <input type="text" id="univ_name" name="uni_name">
+      <br>
+      <label for="univ_course">Course:</label>
+      <input type="text" id="univ_course" name="univ_course">
+      <br>
+      <label for="ug_board">Board of Education:</label>
+      <input type="text" id="ug_board" name="ug_board">
+      <br>
+      <div class="radio-btns">
+        <input type="radio" id="autonomous" name="autonomous" value="autonomous">
+        <label for="autonomous">Autonomous</label><br>
+        <input type="radio" id="JNTUK" name="JNTUK" value="JNTUK">
+        <label for="JNTUK">JNTUK</label><br>
+      </div>
+      <br>
+      <label for="univ_start_year">Start Year:</label>
+      <input type="number" id="univ_start_year" name="univ_start_year" min="1900" max="2023">
+      <br>
+      <label for="univ_end_year">End Year:</label>
+      <input type="number" id="univ_end_year" name="univ_end_year" min="1900" max="2023">
+      <br>
+      <label for="univ_cgpa">CGPA:</label>
+      <input type="text" id="univ_cgpa" name="univ_cgpa">
+      <br>
+      <h2>Intermediate / Diploma Details </h2>
+      <label for="clg_name">College Name:</label>
+      <input type="text" id="clg_name" name="clg_name">
+      <br>
+      <label for="clg_course">Course:</label>
+      <input type="text" id="clg_course" name="clg_course">
+      <br>
+      <label for="clg_board">Board of Education:</label>
+      <input type="text" id="clg_board" name="clg_board">
+      <br>
+      <label for="clg_start_year">Start Year:</label>
+      <input type="number" id="clg_start_year" name="clg_start_year" min="1900" max="2023">
+      <br>
+      <label for="clg_end_year">End Year:</label>
+      <input type="number" id="clg_end_year" name="clg_end_year" min="1900">
+      <br>
+      <label for="clg_cgpa">CGPA:</label>
+      <input type="text" id="clg_cgpa" name="clg_cgpa">
+      
+      <h2>SSC Details</h2>
+      <label for="school_name">School Name:</label>
+      <input type="text" id="school_name" name="scl_name">
+      <br>
+      <label for="yop">Year of Passing:</label>
+      <input type="number" id="yop" name="yop" min="1900" max="2023">
+      <br>
+      <label for="school_cgpa">CGPA:</label>
+      <input type="text" id="school_cgpa" name="scl_cgpa">
+      <br>
+      <label for="scl_board">Board of Education:</label>
+      <input type="text" id="scl_board" name="scl_board">
+      <br>
+      <button name= "eprev" type="button" onclick="showFirstPage();">Previous</button>
+     <button name="enxt" type="button" onclick="showThirdPage();">Next</button>
+      </div>
+      <div id="third" style="display: none;">
+        <label for="skills">Skills:</label>
+      <select id="skills" name="skills">
+        <option value="">Select a skill...</option>
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+        <option value="javascript">JavaScript</option>
+        <option value="react">React</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="angular">Angular</option>
+        <option value="node">Node.js</option>
+        <option value="mongodb">MongoDB</option>
+        <option value="mysql">MySQL</option>
+      </select>
+      <br><br>
+      <label for="projects">Projects:</label>
+      <input type="text" id="projects" name="projects">
+      <br><br>
+      <label for="certificates">Certificates:</label>
+      <input type="text" id="certificates" name="certificates">
+      <br><br>
+      <label for="internships">Internships:</label>
+      <input type="text" id="internships" name="internships">
+      <br><br>
+      <button name= "cprev" type="button" onclick="showSecondPage();">Previous</button>
+      </div>
+      
+    </form>
 </div>  
-    
+
+    <script>
+        function showFirstPage(){
+    document.getElementById('first').style.display='block';
+    document.getElementById('second').style.display='none';
+    document.getElementById('third').style.display='none';
+  }
+  function showSecondPage(){
+    console.log("Hello");
+    document.getElementById('first').style.display='none';
+    document.getElementById('second').style.display='block';
+    document.getElementById('third').style.display='none';
+  }
+  function showThirdPage(){
+    document.getElementById('first').style.display='none';
+    document.getElementById('second').style.display='none';
+    document.getElementById('third').style.display='block';
+  }
+
+
+
+    </script>
 </body>
+
 </html>

@@ -1,0 +1,47 @@
+.logo-container {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+.c-shape {
+  width: 50px;
+  height: 100px;
+  border-radius: 50% 50% 0 0;
+  position: absolute;
+  top: 0;
+}
+
+.left {
+  left: 0;
+  transform: rotate(45deg);
+}
+
+.right {
+  right: 0;
+  transform: rotate(-45deg);
+}
+.logo-container {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  background-color: black;
+}
+
+.c-shape {
+  width: 50px;
+  height: 100px;
+  border-radius: 50% 50% 0 0;
+  position: absolute;
+  top: 0;
+  background-color: white;
+}
+
+.left {
+  left: 0;
+  transform: rotate(45deg);
+}
+
+.right {
+  right: 0;
+  transform: rotate(-45deg);
+}
