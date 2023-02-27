@@ -1,47 +1,41 @@
-.logo-container {
-  width: 100px;
-  height: 100px;
-  position: relative;
+*{
+  background-color: #1F2833;
 }
-.c-shape {
-  width: 50px;
-  height: 100px;
-  border-radius: 50% 50% 0 0;
-  position: absolute;
-  top: 0;
+.btn{
+  margin: 10px;
 }
-
-.left {
-  left: 0;
-  transform: rotate(45deg);
+.title{
+  color:#66FCF1;
+  font-size: larger ;
 }
-
-.right {
-  right: 0;
-  transform: rotate(-45deg);
+.resume{
+  color: white;
+  text-decoration: dotted;
+  font-size: 10em;
+  padding: 10px;
 }
-.logo-container {
-  width: 100px;
-  height: 100px;
-  position: relative;
-  background-color: black;
+.matters{
+  color: #66FCF1;
+  font-size: 12em;
+}
+.alot{
+  color:white;
+  font-size: 6em;
 }
 
-.c-shape {
-  width: 50px;
-  height: 100px;
-  border-radius: 50% 50% 0 0;
-  position: absolute;
-  top: 0;
-  background-color: white;
+.content{
+  padding: 10px;
+  font-size: medium;
+}
+.students{
+  background-color: #c5c6c7;
+  padding: 20px;
 }
 
-.left {
-  left: 0;
-  transform: rotate(45deg);
+.admin{
+  background-color: #45A29E;
+  padding: 20px;
 }
-
-.right {
-  right: 0;
-  transform: rotate(-45deg);
+.end{
+  color: #c5c6c7;
 }
