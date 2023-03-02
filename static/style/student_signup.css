@@ -64,4 +64,8 @@ body {
   color: #1F2833;
   font-size: 18px;
 }
+ ::placeholder {
+  color: white;
+}
+
 

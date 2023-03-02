@@ -67,3 +67,11 @@ body {
 .fa{
   color:#45A29E ;
 }
+ #popup{
+    color: #1F2833;
+    margin: 2px;
+    text-align: center;
+  }
+::placeholder {
+  color: white;
+}
