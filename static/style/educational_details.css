@@ -1,0 +1,73 @@
+form {
+    margin: 0 auto;
+    width: 50%;
+    padding: 70px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  }
+  body{
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    font-size: 18px;
+    width: 200px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 5px;
+    
+    font-size: 16px;
+    border: 1px solid #ccc;
+  }
+  
+  
+  .radio-btns {
+    margin-bottom: 20px;
+  }
+  
+  .radio-btns label {
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  
+  button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  button:hover {
+    background-color: #3e8e41;
+  }
+  
+  button[name="eprev"] {
+    float: left;
+  }
+  
+  button[name="enxt"] {
+    float: right;
+  }
+  
