@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style/student_profile.css">
-    
+    <script src="js/student_profile.js"></script>
     
 </head>
 <body>
@@ -21,7 +21,7 @@
   <button class="openbtn" onclick="openNav()">&#9776;  CampusConnect</button>
   </div>
   <h1>Student Profile</h1>
-    <div>Hello <%= name %></div>
+    <div class="greeting">Hello <%= name %></div>
     <form action="/saveDetails" method="post">
       <div id="first">
       <label for="fname">First Name:</label>
@@ -128,8 +128,8 @@
       <label for="scl_board">Board of Education:</label>
       <input type="text" id="scl_board" name="scl_board">
       <br>
-      <button name= "eprev" type="button" onclick="showFirstPage();">Previous</button>
-     <button name="enxt" type="button" onclick="showThirdPage();">Next</button>
+      <button name= "prev" type="button" onclick="showFirstPage();">Previous</button>
+     <button name="next" type="button" onclick="showThirdPage();">Next</button>
       </div>
       <div id="third" style="display: none;">
         <label for="skills">Skills:</label>
@@ -179,8 +179,17 @@
     document.getElementById('second').style.display='none';
     document.getElementById('third').style.display='block';
   }
+  
+function openNav() {
+  document.getElementById("mySidebar").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+}
 
-
+/* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
+function closeNav() {
+  document.getElementById("mySidebar").style.width = "0";
+  document.getElementById("main").style.marginLeft = "0";
+}
 
     </script>
 </body>
