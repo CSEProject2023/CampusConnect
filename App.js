@@ -1,4 +1,4 @@
-var express = require('express')
+var express = require('express');
 const { createPool } = require('mysql2');
 const cookie = require('cookie-parser');
 const PDFDocument = require('pdfkit');
@@ -10,6 +10,7 @@ const uuidv4 = require('uuid').v4;
 var bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const mime = require('mime');
+const { render } = require('ejs');
 var isAuthenticated = true;
 var user, admin,personal_data,ed_details,projects,internships;
 var app = new express();
@@ -70,57 +71,38 @@ function profile_data(req,res){
     res.render('student_login', { togglePopup : true, message: 'You need to login first' });
   }
   else{
-    pool.query(`select project from projects where id=(?)`,[user[0].email_id],function(err,result,fields){
+    console.log(user);
+    pool.query(`
+    SELECT 
+      user_credentials.email_id, 
+      projects.project, 
+      internships.internship, 
+      student_personal_details.*, 
+      student_ed_details.*
+    FROM 
+      user_credentials 
+      LEFT JOIN projects ON user_credentials.email_id = projects.id
+      LEFT JOIN internships ON user_credentials.email_id = internships.id
+      LEFT JOIN student_personal_details ON user_credentials.email_id = student_personal_details.id
+      LEFT JOIN student_ed_details ON user_credentials.email_id = student_ed_details.id
+    WHERE 
+      user_credentials.username = ?
+  `, [user.username], function(err, result) {
     if (err) {
       console.log(err);
-    }
-    else if(result.length > 0){
-      console.log("project_details", result);
-      project_details= JSON.parse(result[0].project);
-    }
-  });
-  pool.query(`select internship from internships where id=(?)`,[user[0].email_id],function(err,result,fields){
-    if (err) {
-      return reject(err);
-    }
-    else if(result.length > 0){
-      intern_details =  JSON.parse(result[0].internship);
+    } else {
+      if (result.length > 0) {
+        console.log(user);
+        const user_det = result[0];
+        project_details = JSON.parse(user_det.project || null);
+        intern_details = JSON.parse(user_det.internship || null);
+        personal_data = result[0];
+        ed_details = result[0];
+        res.render('student_profile', {user_d:user.username,personal_data:personal_data,ed_details:ed_details,intern:intern_details,projects:project_details});
+      }
     }
   });
-     const personalDetailsPromise = new Promise((resolve, reject) => {
-  pool.query(`select * from student_personal_details where id=(?)`,[user[0].email_id],function(err,result,fields){
-    if (err) {
-      return reject(err);
-    }
-    else if(result.length > 0){
-      const personal_data = result[0];
-      resolve(personal_data);
-    }
-  });
-});
-
-const edDetailsPromise = new Promise((resolve, reject) => {
-  pool.query(`select * from student_ed_details where id=(?)`,[user[0].email_id],function(err,result,fields){
-    if (err) {
-      return reject(err);
-    }
-    else if(result.length > 0){
-      const ed_details = result[0];
-      resolve(ed_details);
-    }
-  });
-});
-
-
-Promise.all([personalDetailsPromise, edDetailsPromise])
-  .then(([personal_data, ed_details]) => {
-    console.log("project_details",project_details,"intern_details",intern_details);
-      res.render('student_profile', { name:user[0].username,personal_data:personal_data,ed_details:ed_details,intern:intern_details,projects:project_details});
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-  }
+}
 }
 app.get('/student_profile',profile_data);
 
@@ -173,7 +155,7 @@ app.post('/student_login',function(req,res,next){
       //  const sessionId = uuidv4();
       //   sessions[sessionId]={email,userId:1}
       //   console.log(sessionId);
-       user = result;  
+       user = result[0];  
        isAuthenticated=true;
       res.redirect('/student_profile');
   }
@@ -251,7 +233,7 @@ app.post('/saveDetails',(req,res)=>{
     var project_des=[];
     project_titles.push(req.body.title);
     project_des.push(req.body.description);
-    for (var i = 0; i < project_titles[0].length; i++) {
+    for (var i = 0; project_titles!=[]&& i < project_titles[0].length; i++) {
       var project = {
         title: project_titles[0][i],
         description: project_des[0][i]
@@ -263,7 +245,7 @@ app.post('/saveDetails',(req,res)=>{
    var job=[];
     job_titles.push(req.body.company);
     job.push(req.body.jobDesc);
-    for (var i = 0; i < job_titles[0].length; i++) {
+    for (var i = 0;job_titles!=[]&& i < job_titles[0].length; i++) {
       var intern = {
         company: job_titles[0][i],
         jobDesc: job[0][i]
@@ -271,30 +253,30 @@ app.post('/saveDetails',(req,res)=>{
       internships.push(intern);
   }
   console.log(projects,internships);
-  pool.query(`select * from student_personal_details where id=?`,[user[0].email_id],function(err,result,fields){
+  pool.query(`select * from student_personal_details where id=?`,[user.email_id],function(err,result,fields){
     if (err) {
         return console.log(err);
     }
     else if(result.length == 0){
       //console.log("result",result);
-       pool.query(`insert into student_personal_details (id,firstname,lastname,dob,gender,aadhaar,father,mother,parent_phone,email,phone,address)values (?,?,?,?,?,?,?,?,?,?,?,?)`,[user[0].email_id, firstname,lastname,dob,gender,aadhaar,father_name,mother_name,parent_phone,email,phone,address],function(err,result){
+       pool.query(`insert into student_personal_details (id,firstname,lastname,dob,gender,aadhaar,father,mother,parent_phone,email,phone,address)values (?,?,?,?,?,?,?,?,?,?,?,?)`,[user.email_id, firstname,lastname,dob,gender,aadhaar,father_name,mother_name,parent_phone,email,phone,address],function(err,result){
       if(err){
         return console.log(err);
       }
     });
-     pool.query(`insert into student_ed_details (id,reg_no,uni_name,univ_course,ug_board,univ_start_year,univ_end_year,univ_cgpa,clg_name,clg_course,clg_board,clg_start_year,clg_end_year,clg_cgpa,scl_name,yop,scl_cgpa,scl_board,skills,certi)values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[user[0].email_id,reg_no,uni_name,univ_course,ug_board,univ_start_year,univ_end_year,univ_cgpa,clg_name,clg_course,clg_board,clg_start_year,clg_end_year,clg_cgpa,scl_name,yop,scl_cgpa,scl_board,skills,certificates],function(err,result){
+     pool.query(`insert into student_ed_details (id,reg_no,uni_name,univ_course,ug_board,univ_start_year,univ_end_year,univ_cgpa,clg_name,clg_course,clg_board,clg_start_year,clg_end_year,clg_cgpa,scl_name,yop,scl_cgpa,scl_board,skills,certi)values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[user.email_id,reg_no,uni_name,univ_course,ug_board,univ_start_year,univ_end_year,univ_cgpa,clg_name,clg_course,clg_board,clg_start_year,clg_end_year,clg_cgpa,scl_name,yop,scl_cgpa,scl_board,skills,certificates],function(err,result){
       if(err){
         return console.log(err);
       }
     }); 
     // insert projects
-    pool.query(`insert into projects (id, project)`,[user[0].email_id,JSON.stringify(projects)],function(err,result){
+    pool.query(`insert into projects (id, project)`,[user.email_id,JSON.stringify(projects)],function(err,result){
       if(err){
         return console.log(err);
       }
     }); 
     //insert internships
-     pool.query(`insert into internships (id, internship)`,[user[0].email_id,JSON.stringify(internships)],function(err,result){
+     pool.query(`insert into internships (id, internship)`,[user.email_id,JSON.stringify(internships)],function(err,result){
       if(err){
         return console.log(err);
       }
@@ -303,25 +285,25 @@ app.post('/saveDetails',(req,res)=>{
 
   }
     else{
-      pool.query(`UPDATE student_personal_details SET firstname=?, lastname=?, dob=?, gender=?, aadhaar=?, father=?, mother=?, parent_phone=?, email=?, phone=?, address=? WHERE id=?`,[firstname,lastname,dob,gender,aadhaar,father_name,mother_name,parent_phone,email,phone,address,user[0].email_id],function(err,result){
+      pool.query(`UPDATE student_personal_details SET firstname=?, lastname=?, dob=?, gender=?, aadhaar=?, father=?, mother=?, parent_phone=?, email=?, phone=?, address=? WHERE id=?`,[firstname,lastname,dob,gender,aadhaar,father_name,mother_name,parent_phone,email,phone,address,user.email_id],function(err,result){
       if(err){
         return console.log(err);
       }
     });
       
-    pool.query(`UPDATE student_ed_details SET reg_no=?, uni_name=?, univ_course=?, ug_board=?, univ_start_year=?, univ_end_year=?, univ_cgpa=?, clg_name=?, clg_course=?, clg_board=?, clg_start_year=?, clg_end_year=?, clg_cgpa=?, scl_name=?, yop=?, scl_cgpa=?, scl_board=?, skills=?, certi=? WHERE id=?`,[reg_no,uni_name,univ_course,ug_board,univ_start_year,univ_end_year,univ_cgpa,clg_name,clg_course,clg_board,clg_start_year,clg_end_year,clg_cgpa,scl_name,yop,scl_cgpa,scl_board,skills,certificates,user[0].email_id],function(err,result){
+    pool.query(`UPDATE student_ed_details SET reg_no=?, uni_name=?, univ_course=?, ug_board=?, univ_start_year=?, univ_end_year=?, univ_cgpa=?, clg_name=?, clg_course=?, clg_board=?, clg_start_year=?, clg_end_year=?, clg_cgpa=?, scl_name=?, yop=?, scl_cgpa=?, scl_board=?, skills=?, certi=? WHERE id=?`,[reg_no,uni_name,univ_course,ug_board,univ_start_year,univ_end_year,univ_cgpa,clg_name,clg_course,clg_board,clg_start_year,clg_end_year,clg_cgpa,scl_name,yop,scl_cgpa,scl_board,skills,certificates,user.email_id],function(err,result){
       if(err){
         return console.log(err);
       }
     })
 
-     pool.query(`UPDATE projects SET project=? where id=?`,[JSON.stringify(projects),user[0].email_id],function(err,result){
+     pool.query(`UPDATE projects SET project=? where id=?`,[JSON.stringify(projects),user.email_id],function(err,result){
       if(err){
         return console.log(err);
       }
     }); 
 
-     pool.query(`UPDATE internships SET internship=? where id=?`,[JSON.stringify(internships),user[0].email_id],function(err,result){
+     pool.query(`UPDATE internships SET internship=? where id=?`,[JSON.stringify(internships),user.email_id],function(err,result){
       if(err){
         return console.log(err);
       }
@@ -355,46 +337,101 @@ app.get('/search',function(req,res){
       console.log(err);
     } else {
       if (result.length > 0) {
-        const user = result[0];
-        const project_details = JSON.parse(user.project || null);
-        const intern_details = JSON.parse(user.internship || null);
-        const personal_data = result[0];
-        const ed_details = result[0];
+        user = result[0];
+        project_details = JSON.parse(user.project || null);
+        intern_details = JSON.parse(user.internship || null);
+        personal_data = result[0];
+        ed_details = result[0];
         res.render('admin_view', {personal_data:personal_data,ed_details:ed_details,intern:intern_details,projects:project_details});
       }
     }
   });
 });
    
+function generatePDF(req, res) {
+  // create a new PDF document
+  const doc = new PDFDocument();
 
+  // add some content to the PDF
+  doc.fontSize(20).text(`${personal_data.firstname} ${personal_data.lastname}`, { align: 'center' });
+  doc.fontSize(12).text(`Email: ${personal_data.email}`, { align: 'center' });
+  doc.fontSize(12).text(`Phone: ${personal_data.phone}`, { align: 'center' });
+  doc.moveDown();
 
+  // add education details
+  doc.fontSize(16).text('Education', { underline: true });
+  doc.moveDown();
+  doc.fontSize(12).text(`Degree: ${ed_details.univ_course}`);
+  doc.fontSize(12).text(`Institution: ${ed_details.uni_name}`);
+  doc.fontSize(12).text(`CGPA: ${ed_details.univ_cgpa}`);
+   doc.fontSize(12).text(`Intermediate: ${ed_details.univ_course}`);
+  doc.fontSize(12).text(`Institution: ${ed_details.clg_name}`);
+  doc.fontSize(12).text(`CGPA: ${ed_details.clg_cgpa}`);
+  doc.fontSize(12).text(`SSC: ${ed_details.univ_course}`);
+  doc.fontSize(12).text(`Institution: ${ed_details.clg_name}`);
+  doc.fontSize(12).text(`CGPA: ${ed_details.clg_cgpa}`);
+  doc.moveDown();
 
-
-app.get('/generate-pdf', (req, res) => {
-
-  const query = 'SELECT * FROM table_name';
-
-  connection.query(query, (error, results) => {
-    if (error) throw error;
-    
-    const doc = new PDFDocument();
-    
-    res.setHeader('Content-Type', 'application/pdf');
-
-    res.setHeader('Content-Disposition', 'attachment; filename="data.pdf"');
-
-    doc.pipe(res);
-
-    results.forEach(row => {
-      Object.keys(row).forEach(key => {
-        doc.text(`${key}: ${row[key]}`);
-      });
-      doc.addPage();
+  // add project details
+  if (project_details) {
+    doc.fontSize(16).text('Projects', { underline: true });
+    doc.moveDown();
+    project_details.forEach((project, index) => {
+      doc.fontSize(12).text(`Project ${index+1}: ${project.title}`);
+      doc.fontSize(10).text(`Description: ${project.description}`);
+      // doc.fontSize(10).text(`Technologies: ${project.technologies}`);
+      doc.moveDown();
     });
-    
-    // End the PDF data stream
-    doc.end();
-  });
-});
+  }
+
+  // add internship details
+  if (intern_details) {
+    doc.fontSize(16).text('Experience', { underline: true });
+    doc.moveDown();
+    intern_details.forEach((internship, index) => {
+      doc.fontSize(12).text(`Internship ${index+1}: ${internship.title}`);
+      doc.fontSize(10).text(`Description: ${internship.description}`);
+      doc.fontSize(10).text(`Organization: ${internship.organization}`);
+      doc.moveDown();
+    });
+  }
+
+   doc.fontSize(16).text('Skills', { underline: true });
+  doc.moveDown();
+   var skill_list,certi_list;
+  var skills_sep = ed_details.skills;
+  var certi_sep=ed_details.certi;
+  if(skills_sep!=null || skills_sep!=''){
+      skill_list=skills_sep.split(",");
+  }
+  if(certi_sep!=null || certi_sep!=''){
+      certi_list=certi_sep.split(",");
+  }
+  doc.fontSize(12).text(`Degree: ${ed_details.univ_course}`);
+  doc.fontSize(12).text(`Institution: ${ed_details.uni_name}`);
+  doc.fontSize(12).text(`CGPA: ${ed_details.univ_cgpa}`);
+  doc.moveDown();
+
+
+  // finalize the PDF and close the file stream
+  doc.end();
+
+  const filename = `${personal_data.firstname}_${personal_data.lastname}.pdf`;
+
+  // read the file from disk and pipe it to the response object
+  const fileStream = fs.createReadStream(filename);
+
+  res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+  res.setHeader('Content-Type', 'application/pdf');
+
+  // pipe the file to the response object
+  fileStream.pipe(res);
+  return filename;
+};
+
+
+
+
+app.get('/generatePDF',generatePDF);
 
 app.listen(3000);

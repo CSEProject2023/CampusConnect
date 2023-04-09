@@ -8,16 +8,10 @@
     
 </head>
 <body>
-    <div id="mySidebar" class="sidebar">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-  <a href="#">Profile</a>
-  <a href="#">Edit</a>
-  <a href="#">Logout</a>
-</div>
-
 <div id="main">
 <div class="navbar">
-  <button class="openbtn" onclick="openNav()">&#9776;  CampusConnect</button>
+  <button class="openbtn"> CampusConnect</button>
+<button>Logout</button>
   </div>
   <h1>Student Profile</h1>
     
@@ -79,9 +73,9 @@
         <label for="ug_board">Board of Education:</label>
         <div class="radio-btns">
           <input type="radio" id="autonomous" name="ug_board" value="
-          Autonomous" readonly="true" >
+          Autonomous" readonly="true" <% if (ed_details.ug_board === 'Autonomous') { %>checked<% } %>>
           <label for="autonomous">Autonomous</label><br>
-          <input type="radio" id="JNTUK" name="ug_board" value="JNTUK"  readonly="true">
+          <input type="radio" id="JNTUK" name="ug_board" value="JNTUK"  readonly="true" <% if (ed_details.ug_board === 'JNTUK') { %>checked<% } %>>
           <label for="JNTUK">JNTUK</label><br>
         </div>
         <br>
@@ -135,7 +129,7 @@
         <br><br>
         <label for="skills">Projects:</label>
         <div id="projectsList">
-        <% if(projects.length == 0) { %>
+        <% if(projects != null && projects.length == 0) { %>
   <div class="project">
     <label>Title:</label>
     <input type="text" name="title" readonly="true">
@@ -143,8 +137,9 @@
     <label>Description:</label>
     <textarea name="description" readonly="true"></textarea>
     <br>
+    <button type="button" class="remove-project">Remove</button>
   </div>
-<% } else { %>
+<% } else if(projects != null ) { %>
   <% for (p of projects) { %>
     <div class="project">
       <label>Title:</label>
@@ -153,18 +148,21 @@
       <label>Description:</label>
       <textarea name="description" readonly="true"><%= p.description %></textarea>
       <br>
+      <button type="button" class="remove-project">Remove</button>
+      <br>
     </div>
   <% } %>
 <% } %>
         </div>
-        
+        <br>
         <button type="button" id="addProject">Add Project</button>
+        <br><br>
         <label for="certificates">Certificates:</label>
         <input type="text" id="certificates" name="certificates"  readonly="true" value="<%= ed_details.certi%>">
         <br><br>
         <label for="internships">Internships:</label>
         <div id="internshipsList">
-          <% if(intern.length == 0) { %>
+          <% if(intern!=null && intern.length == 0) { %>
             <div class="internship">
             <label>Company:</label>
             <input type="text" name="company"  readonly="true" >
@@ -173,7 +171,7 @@
             <textarea name="jobDesc"  readonly="true"></textarea>
             <br>
           </div>
-          <% } else { %>
+          <% } else if(intern!=null) { %>
   <% for (i of intern) { %>
     <div class="internship">
             <label>Company:</label>
@@ -182,55 +180,60 @@
             <label>Description:</label>
             <textarea name="jobDesc"  readonly="true"><%= i.jobDesc %></textarea>
             <br>
+             <button type="button" class="remove-internship">Remove</button><br>
           </div>
-          <% } %>
 <% } %>
-        </div>
+<% } %>
+        </div><br>
         <button type="button" id="addInternship">Add Internship</button>
         <br><br>
         <button name= "prev" type="button" onclick="showSecondPage();">Previous</button>
       </div>
       <button type="button" onclick="toggleFormEditable()" style="margin:0 auto">Edit</button>
       <button type="submit">Save</button>
+      <button type="button" onclick="generatePDF()">Download Resume</button>
     </form>
 </div>  
       <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
     <script>
+      function generatePDF(){
+            window.location.href = "/generatePDF";
+        }
      const addProjectButton = document.getElementById("addProject");
       const projectsList = document.getElementById("projectsList");
 
-      function removeProject(event) {
-        event.target.parentElement.remove();
-      }
-
       function addProject() {
-        const projectDiv = document.createElement("div");
-        projectDiv.classList.add("project");
-        projectDiv.innerHTML = `
-          <label>Title:</label>
-          <input type="text" name="title"  >
-          <br>
-          <label>Description:</label>
-          <textarea name="description"  ></textarea>
-          <br>
-          <button type="button" class="remove-project">Remove</button>
-        `;const removeButton = projectDiv.querySelector(".remove-project");
-        removeButton.addEventListener("click", removeProject);
-        projectsList.appendChild(projectDiv);
-      }
+  const projectDiv = document.createElement("div");
+  projectDiv.classList.add("project");
+  projectDiv.innerHTML = `
+    <label>Title:</label>
+    <input type="text" name="title"  >
+    <br>
+    <label>Description:</label>
+    <textarea name="description"  ></textarea>
+    <br>
+    <button type="button" class="remove-project">Remove</button>
+  `;
+  projectsList.appendChild(projectDiv);
+}
+function removeProject(event) {
+  const projectDiv = event.target.closest(".project");
+  projectDiv.remove();
+}
+
+projectsList.addEventListener("click", function(event) {
+  if (event.target.classList.contains("remove-project")) {
+    removeProject(event);
+  }
+});
 
       addProjectButton.addEventListener("click", addProject);
-
       const addInternshipButton = document.getElementById("addInternship");
       const internshipsList = document.getElementById("internshipsList");
 
-      function removeInternship(event) {
-        event.target.parentElement.remove();
-      }
-
       function addInternship() {
         const internDiv = document.createElement("div");
-        internDiv.classList.add("project");
+        internDiv.classList.add("internship");
         internDiv.innerHTML = `
           <label>Company:</label>
           <input type="text" name="company"  >
@@ -240,11 +243,18 @@
           <br>
           <button type="button" class="remove-internship">Remove</button>
         `;
-        const removeButton = internDiv.querySelector(".remove-internship");
-        removeButton.addEventListener("click", removeProject);
         internshipsList.appendChild(internDiv);
       }
+function removeInternship(event) {
+  const internDiv = event.target.closest(".internship");
+  internDiv.remove();
+}
 
+internshipsList.addEventListener("click", function(event) {
+  if (event.target.classList.contains("remove-internship")) {
+    removeInternship(event);
+  }
+});
       addInternshipButton.addEventListener("click", addInternship);
 
 
