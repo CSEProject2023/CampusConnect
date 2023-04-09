@@ -11,7 +11,7 @@
 <div id="main">
 <div class="navbar">
   <button class="openbtn"> CampusConnect</button>
-<button>Logout</button>
+<button class="logout" onclick="window.location.href ='/student_logout'">Logout</button>
   </div>
   <h1>Student Profile</h1>
     
@@ -32,7 +32,7 @@
           <label for="male">Male</label><br>
           <input type="radio" id="female" name="gender" value="female" readonly="true" <% if (personal_data.gender === 'female') { %>checked<% } %>>
           <label for="female">Female</label><br>
-          <input type="radio" id="other" name="gender" value="other" readonly="true">
+          <input type="radio" id="other" name="gender" value="other" readonly="true" <% if (personal_data.gender === 'other') { %>checked<% } %>>
           <label for="other">Other</label><br>
         </div>
         <label for="adhaar">Aadhaar Number:</label>
@@ -72,8 +72,7 @@
         <br>
         <label for="ug_board">Board of Education:</label>
         <div class="radio-btns">
-          <input type="radio" id="autonomous" name="ug_board" value="
-          Autonomous" readonly="true" <% if (ed_details.ug_board === 'Autonomous') { %>checked<% } %>>
+          <input type="radio" id="autonomous" name="ug_board" value="Autonomous" readonly="true" <% if (ed_details.ug_board === 'Autonomous') { %>checked<% } %>>
           <label for="autonomous">Autonomous</label><br>
           <input type="radio" id="JNTUK" name="ug_board" value="JNTUK"  readonly="true" <% if (ed_details.ug_board === 'JNTUK') { %>checked<% } %>>
           <label for="JNTUK">JNTUK</label><br>

@@ -9,25 +9,16 @@
     <script src="js/student_profile.js"></script>
 </head>
 <body>
-    <div id="mySidebar" class="sidebar">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-  <a href="#">Profile</a>
-  <a href="#">Search</a>
-  <a href="#">Logout</a>
-</div>
 
 <div id="main">
 <div class="navbar">
   <button class="openbtn" onclick="openNav()">&#9776;  CampusConnect</button>
   </div>
   <h1>Admin Profile</h1>
-    <div>Hello <%= name %></div>
     <form action="/search" method="get">
   <input type="text" placeholder="Search..." name="q">
   <button type="submit">Search</button>
 </form>
-
-    <a href="/generate-pdf">Download PDF</a>
 </div>  
     
 </body>

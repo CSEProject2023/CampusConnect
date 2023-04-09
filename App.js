@@ -1,4 +1,5 @@
 var express = require('express');
+const handlebars = require('handlebars');
 const { createPool } = require('mysql2');
 const cookie = require('cookie-parser');
 const PDFDocument = require('pdfkit');
@@ -11,7 +12,7 @@ var bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const mime = require('mime');
 const { render } = require('ejs');
-var isAuthenticated = true;
+var isAuthenticated;
 var user, admin,personal_data,ed_details,projects,internships;
 var app = new express();
 let project_details,intern_details;
@@ -71,7 +72,6 @@ function profile_data(req,res){
     res.render('student_login', { togglePopup : true, message: 'You need to login first' });
   }
   else{
-    console.log(user);
     pool.query(`
     SELECT 
       user_credentials.email_id, 
@@ -143,8 +143,16 @@ app.post('/admin_signup',function(req,res,next){
       return res.redirect('/admin_login');
     })
 });
-
+app.get('/admin_logout',function(req,res){
+  isAuthenticated=false;
+  res.redirect('/admin_login');
+});
+app.get('/student_logout',function(req,res){
+  isAuthenticated=false;
+  res.redirect('/student_login');
+})
 app.post('/student_login',function(req,res,next){
+   
   var email = req.body.email;
   var password = req.body.pass;
   pool.query(`select * from user_credentials where email_id=(?) and password=(?)`,[email,password],function(err,result,fields){
@@ -167,6 +175,7 @@ app.post('/student_login',function(req,res,next){
 });
 
 app.post('/admin_login',function(req,res,next){
+  isAuthenticated=false;
   var email = req.body.admin_user;
   var password = req.body.admin_password;
   pool.query(`select * from admin_credentials where email_id=(?) and password=(?)`,[email,password],function(err,result,fields){
@@ -231,8 +240,17 @@ app.post('/saveDetails',(req,res)=>{
     var projects = [];
     var project_titles=[];
     var project_des=[];
+    if(typeof req.body.title ==='string'){
+      project_titles.push([req.body.title]);
+    }
+    else{
     project_titles.push(req.body.title);
-    project_des.push(req.body.description);
+    }
+    if (typeof req.body.description === "string") {
+      project_des.push([req.body.description]);
+    } else {
+      project_des.push(req.body.description);
+    }
     for (var i = 0; project_titles!=[]&& i < project_titles[0].length; i++) {
       var project = {
         title: project_titles[0][i],
@@ -243,16 +261,26 @@ app.post('/saveDetails',(req,res)=>{
    var internships = [];
    var job_titles=[];
    var job=[];
+   if(typeof req.body.company=== 'string'){
+     job_titles.push([req.body.company]);
+   }
+   else{
     job_titles.push(req.body.company);
-    job.push(req.body.jobDesc);
-    for (var i = 0;job_titles!=[]&& i < job_titles[0].length; i++) {
+    
+   }
+   if (typeof req.body.company === "string") {
+     job.push([req.body.jobDesc]);
+   } else {
+     job.push(req.body.jobDesc);
+   }
+    console.log(job_titles);
+    for (var i = 0;job_titles!=[] && i < job_titles[0].length; i++) {
       var intern = {
         company: job_titles[0][i],
         jobDesc: job[0][i]
       };
       internships.push(intern);
   }
-  console.log(projects,internships);
   pool.query(`select * from student_personal_details where id=?`,[user.email_id],function(err,result,fields){
     if (err) {
         return console.log(err);
@@ -311,11 +339,16 @@ app.post('/saveDetails',(req,res)=>{
       
     }
 })
-    res.redirect('/student_profile');
+    setTimeout(() => {
+      res.redirect("/student_profile");
+    }, 1000);
 });
  
   
 app.get('/search',function(req,res){
+   if(!isAuthenticated){
+    res.render('admin_login', { togglePopup : true, message: 'You need to login first' });
+  }
     var search_item = req.query.q;
    pool.query(`
     SELECT 
@@ -349,11 +382,26 @@ app.get('/search',function(req,res){
 });
    
 function generatePDF(req, res) {
+  // const doc = new PDFDocument();
+
+  // // set some response headers
+  // res.setHeader('Content-Type', 'application/pdf');
+  // res.setHeader('Content-Disposition', 'attachment; filename=example.pdf');
+
+  // // pipe the PDF document to the response object
+  // doc.pipe(res);
+
+  // // add some content to the PDF
+  // doc.fontSize(18).text('Example PDF', { align: 'center' });
+  // doc.fontSize(12).text('Hello, World!', { align: 'center' });
+
+  // // finalize the PDF and close the file stream
+  // doc.end();
   // create a new PDF document
   const doc = new PDFDocument();
 
-  // add some content to the PDF
-  doc.fontSize(20).text(`${personal_data.firstname} ${personal_data.lastname}`, { align: 'center' });
+  //add some content to the PDF
+  doc.fontSize(30).text(`${personal_data.firstname} ${personal_data.lastname}`, { align: 'center' });
   doc.fontSize(12).text(`Email: ${personal_data.email}`, { align: 'center' });
   doc.fontSize(12).text(`Phone: ${personal_data.phone}`, { align: 'center' });
   doc.moveDown();
@@ -364,12 +412,13 @@ function generatePDF(req, res) {
   doc.fontSize(12).text(`Degree: ${ed_details.univ_course}`);
   doc.fontSize(12).text(`Institution: ${ed_details.uni_name}`);
   doc.fontSize(12).text(`CGPA: ${ed_details.univ_cgpa}`);
+  doc.moveDown();
    doc.fontSize(12).text(`Intermediate: ${ed_details.univ_course}`);
   doc.fontSize(12).text(`Institution: ${ed_details.clg_name}`);
   doc.fontSize(12).text(`CGPA: ${ed_details.clg_cgpa}`);
-  doc.fontSize(12).text(`SSC: ${ed_details.univ_course}`);
-  doc.fontSize(12).text(`Institution: ${ed_details.clg_name}`);
-  doc.fontSize(12).text(`CGPA: ${ed_details.clg_cgpa}`);
+  doc.fontSize(12).text(`SSC: `);
+  doc.fontSize(12).text(`Institution: ${ed_details.scl_name}`);
+  doc.fontSize(12).text(`CGPA: ${ed_details.scl_cgpa}`);
   doc.moveDown();
 
   // add project details
@@ -389,15 +438,12 @@ function generatePDF(req, res) {
     doc.fontSize(16).text('Experience', { underline: true });
     doc.moveDown();
     intern_details.forEach((internship, index) => {
-      doc.fontSize(12).text(`Internship ${index+1}: ${internship.title}`);
-      doc.fontSize(10).text(`Description: ${internship.description}`);
-      doc.fontSize(10).text(`Organization: ${internship.organization}`);
+      doc.fontSize(12).text(`Internship ${index+1}: ${internship.company}`);
+      doc.fontSize(10).text(`Description: ${internship.jobDesc}`);
       doc.moveDown();
     });
   }
 
-   doc.fontSize(16).text('Skills', { underline: true });
-  doc.moveDown();
    var skill_list,certi_list;
   var skills_sep = ed_details.skills;
   var certi_sep=ed_details.certi;
@@ -407,30 +453,108 @@ function generatePDF(req, res) {
   if(certi_sep!=null || certi_sep!=''){
       certi_list=certi_sep.split(",");
   }
-  doc.fontSize(12).text(`Degree: ${ed_details.univ_course}`);
-  doc.fontSize(12).text(`Institution: ${ed_details.uni_name}`);
-  doc.fontSize(12).text(`CGPA: ${ed_details.univ_cgpa}`);
+   doc.fontSize(16).text('Skills', { underline: true });
   doc.moveDown();
-
-
+  skill_list.forEach((skill, index) => {
+      doc.fontSize(10).text(`${skill}`);
+      doc.moveDown();
+    });
+     doc.fontSize(16).text('Certificates', { underline: true });
+  doc.moveDown();
+  certi_list.forEach((certi, index) => {
+      doc.fontSize(10).text(`${certi}`);
+      doc.moveDown();
+    });
+  
   // finalize the PDF and close the file stream
   doc.end();
 
   const filename = `${personal_data.firstname}_${personal_data.lastname}.pdf`;
 
   // read the file from disk and pipe it to the response object
-  const fileStream = fs.createReadStream(filename);
+  //const fileStream = fs.createReadStream(filename);
 
   res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
   res.setHeader('Content-Type', 'application/pdf');
 
   // pipe the file to the response object
-  fileStream.pipe(res);
+ // fileStream.pipe(res);
+ doc.pipe(res);
   return filename;
 };
 
+// function generatePDF(req,res){
+//   // create a new PDF document
 
+//   const doc = new PDFDocument();
 
+//   // set the PDF document properties
+//   doc.info['Title'] = `${personal_data.firstname} ${personal_data.lastname} Resume`;
+//   doc.info['Author'] = personal_data.firstname;
+//   doc.info['Subject'] = 'Resume';
+//   doc.info['Keywords'] = 'resume, job, skills';
+
+//   // set the font styles
+//   doc.font('Helvetica');
+
+//   // add the header with name, email, and phone number
+//   doc.fontSize(30).fillColor('#444444').text(`${personal_data.firstname} ${personal_data.lastname}`, { align: 'center' });
+//   doc.fontSize(12).fillColor('#888888').text(`Email: ${personal_data.email}`, { align: 'center' });
+//   doc.fontSize(12).fillColor('#888888').text(`Phone: ${personal_data.phone}`, { align: 'center' });
+//   doc.moveDown();
+
+//   // add education details
+//   doc.fontSize(16).fillColor('#444444').text('Education', { underline: true });
+//   doc.moveDown();
+//   doc.fontSize(12).fillColor('#888888').text(`Degree: ${ed_details.univ_course}`);
+//   doc.fontSize(12).fillColor('#888888').text(`Institution: ${ed_details.uni_name}`);
+//   doc.fontSize(12).fillColor('#888888').text(`CGPA: ${ed_details.univ_cgpa}`);
+//   doc.moveDown();
+//   doc.fontSize(12).fillColor('#888888').text(`Intermediate: ${ed_details.univ_course}`);
+//   doc.fontSize(12).fillColor('#888888').text(`Institution: ${ed_details.clg_name}`);
+//   doc.fontSize(12).fillColor('#888888').text(`CGPA: ${ed_details.clg_cgpa}`);
+//   doc.fontSize(12).fillColor('#888888').text(`SSC: `);
+//   doc.fontSize(12).fillColor('#888888').text(`Institution: ${ed_details.scl_name}`);
+//   doc.fontSize(12).fillColor('#888888').text(`CGPA: ${ed_details.scl_cgpa}`);
+//   doc.moveDown();
+
+//   // add project details
+//   if (project_details) {
+//     doc.fontSize(16).fillColor('#444444').text('Projects', { underline: true });
+//     doc.moveDown();
+//     project_details.forEach((project, index) => {
+//       doc.fontSize(12).fillColor('#888888').text(`Project ${index+1}: ${project.title}`);
+//       doc.fontSize(10).fillColor('#888888').text(`Description: ${project.description}`);
+//       doc.moveDown();
+//     });
+//   }
+
+//   // add internship details
+//   if (intern_details) {
+//     doc.fontSize(16).fillColor('#444444').text('Experience', { underline: true });
+//     doc.moveDown();
+//     intern_details.forEach((internship, index) => {
+//       doc.fontSize(12).fillColor('#888888').text(`Internship ${index+1}: ${internship.title}`);
+//       doc.fontSize(10).fillColor('#888888').text(`Description: ${internship.description}`);
+//       doc.moveDown();
+//     });
+//   }
+
+//   // add skills and certifications
+//   doc.fontSize(16).fillColor('#444444').text('Skills', { underline: true });
+//   doc.moveDown();
+//   var skill_list,certi_list;
+//   var skills_sep = ed_details.skills;
+//   var certi_sep=ed_details.certi;
+//   // if(skills_sep!=null || skills_sep!=''){
+//   //     skill_list
+// const filename = `${personal_data.firstname}_${personal_data.lastname}.pdf`;
+//  res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+// res.setHeader('Content-Type', 'application/pdf');
+// doc.pipe(res);
+// //   return filename;
+// return filename;
+// }
 
 app.get('/generatePDF',generatePDF);
 
