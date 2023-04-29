@@ -4,6 +4,7 @@ const { createPool } = require('mysql2');
 const cookie = require('cookie-parser');
 const PDFDocument = require('pdfkit');
 var fs=require('fs');
+const sessionStorage = require("node-sessionstorage");
 var path = require('path')
 const session = require('express-session');
 const crypto = require('crypto');
@@ -63,6 +64,12 @@ app.get('/admin_signup',function (req, res) {
 })
 app.get('/admin_login',function (req, res) {
   res.render('admin_login', { togglePopup : true, message: '' });
+});
+app.get('/admin_login',function (req, res) {
+  res.render('admin_login', { togglePopup : true, message: '' });
+})
+app.get('/admin_search',function(req,res){
+  res.render('admin_search.ejs');
 })
 app.get('/student_login',function (req, res) {
   res.render('student_login', { togglePopup : true, message: '' });
@@ -72,6 +79,7 @@ function profile_data(req,res){
     res.render('student_login', { togglePopup : true, message: 'You need to login first' });
   }
   else{
+     var user = sessionStorage.getItem("user");
     pool.query(`
     SELECT 
       user_credentials.email_id, 
@@ -109,10 +117,48 @@ app.get('/student_profile',profile_data);
 app.get('/admin_profile',function (req, res) {
   if(!isAuthenticated){
     res.render('admin_login', { togglePopup : true, message: 'You need to login first' });
-  }
-  else{
-  res.render('admin_profile', { name:admin[0]["username"]});
-  return;
+  } else {
+     var admin = sessionStorage.getItem("admin");
+    pool.query(
+      `
+    SELECT 
+      admin_credentials.email_id, 
+      admin_projects.projects, 
+      admin_experience.experience, 
+      admin_personal_details.*, 
+      admin_ed_details.*
+    FROM 
+      admin_credentials 
+      LEFT JOIN admin_projects ON admin_credentials.email_id = admin_projects.id
+      LEFT JOIN admin_experience ON admin_credentials.email_id = admin_experience.id
+      LEFT JOIN admin_personal_details ON admin_credentials.email_id = admin_personal_details.id
+      LEFT JOIN admin_ed_details ON admin_credentials.email_id = admin_ed_details.id
+    WHERE 
+      admin_credentials.username = ?
+  `,
+      [admin.username],
+      function (err, result) {
+        if (err) {
+          console.log(err);
+        } else {
+          if (result.length > 0) {
+            console.log(admin,result);
+            const admin_det = result[0];
+            project_details = JSON.parse(admin_det.projects || null);
+            exp_details = JSON.parse(admin_det.experience || null);
+            personal_data = result[0];
+            ed_details = result[0];
+            res.render("admin_profile", {
+              admin_d: admin.username,
+              admin_personal_data: personal_data,
+              admin_ed_details: ed_details,
+              experience: exp_details,
+              admin_projects: project_details,
+            });
+          }
+        }
+      }
+    );
   }
 })
 
@@ -143,42 +189,46 @@ app.post('/admin_signup',function(req,res,next){
       return res.redirect('/admin_login');
     })
 });
-app.get('/admin_logout',function(req,res){
+app.get('/logout',function(req,res){
   isAuthenticated=false;
-  res.redirect('/admin_login');
+  res.redirect('/');
 });
-app.get('/student_logout',function(req,res){
-  isAuthenticated=false;
-  res.redirect('/student_login');
-})
+
 app.post('/student_login',function(req,res,next){
    
   var email = req.body.email;
+  var username = req.body.email;
   var password = req.body.pass;
-  pool.query(`select * from user_credentials where email_id=(?) and password=(?)`,[email,password],function(err,result,fields){
-    if (err) {
-        return console.log(err);
-    }
-    else if(result.length > 0){
-      //  const sessionId = uuidv4();
-      //   sessions[sessionId]={email,userId:1}
-      //   console.log(sessionId);
-       user = result[0];  
-       isAuthenticated=true;
-      res.redirect('/student_profile');
-  }
-    else{
-       res.render('student_login', { togglePopup : true, message: 'Invalid username or password' });
-      return;
-    }
-})
+ pool.query(
+   `SELECT * FROM user_credentials WHERE (email_id = ? OR username = ?) AND password = ?`,
+   [email, username, password],
+   function (err, result, fields) {
+     if (err) {
+       return console.log(err);
+     } else if (result.length > 0) {
+       //  const sessionId = uuidv4();
+       //   sessions[sessionId]={email,userId:1}
+       //   console.log(sessionId);
+       user = result[0];
+       sessionStorage.setItem("user", user);
+       isAuthenticated = true;
+       res.redirect("/student_profile");
+     } else {
+       res.render("student_login", {
+         togglePopup: true,
+         message: "Invalid username or password",
+       });
+       return;
+     }
+   }
+ );
 });
 
 app.post('/admin_login',function(req,res,next){
   isAuthenticated=false;
   var email = req.body.admin_user;
   var password = req.body.admin_password;
-  pool.query(`select * from admin_credentials where email_id=(?) and password=(?)`,[email,password],function(err,result,fields){
+  pool.query(`select * from admin_credentials where (email_id=(?) or username=(?)) and password=(?)`,[email,email,password],function(err,result,fields){
     if (err) {
         return console.log(err);
     }
@@ -186,9 +236,11 @@ app.post('/admin_login',function(req,res,next){
       const sessionId = uuidv4();
       sessions[sessionId]={email,userId:1}
       console.log(sessionId);
-       admin = result;
+       admin = result[0];
+       sessionStorage.setItem("admin", admin);
+       console.log(admin);
        isAuthenticated=true;
-      res.redirect('/admin_profile');
+      res.redirect('/admin_page');
   }
     else{
        res.render('admin_login', { togglePopup : true, message: 'Invalid username or password' });
@@ -200,7 +252,9 @@ app.post('/admin_login',function(req,res,next){
 //   console.log('user',user);
 // }
 // setInterval(userFunc, 10000 );
-
+app.get('/admin_page',function(req,res){
+  res.render('admin_page');
+})
 app.post('/saveDetails',(req,res)=>{
   //console.log(req.body);
    var firstname = req.body.fname;
@@ -344,6 +398,159 @@ app.post('/saveDetails',(req,res)=>{
     }, 1000);
 });
  
+app.post('/saveAdminDetails',function(req,res){
+   var firstname = req.body.fname;
+   var lastname = req.body.lname;
+   var dob = req.body.dob;
+   var gender = req.body.gender;
+   var email = req.body.email;
+   var phone = req.body.phone;
+   var address = req.body.address;
+
+   var uni_name = req.body.uni_name;
+   var univ_course = req.body.univ_course;
+   var ug_board = req.body.ug_board;
+   var univ_start_year = req.body.univ_start_year;
+   var univ_end_year = req.body.univ_end_year;
+   var univ_cgpa = req.body.univ_cgpa;
+
+   var clg_name = req.body.clg_name;
+   var clg_course = req.body.clg_course;
+   var clg_board = req.body.clg_board;
+   var clg_start_year = req.body.clg_start_year;
+   var clg_end_year = req.body.clg_end_year;
+   var clg_cgpa = req.body.clg_cgpa;
+
+   var scl_name = req.body.scl_name;
+   var yop = req.body.yop;
+   var scl_cgpa = req.body.scl_cgpa;
+   var scl_board = req.body.scl_board;
+
+   var skills = req.body.skills;
+   var certificates = req.body.certificates;
+ var projects = [];
+ var project_titles = [];
+ var project_des = [];
+ if (typeof req.body.title === "string") {
+   project_titles.push([req.body.title]);
+ } else if (Array.isArray(req.body.title)) {
+   project_titles.push(req.body.title);
+ }
+ if (typeof req.body.description === "string") {
+   project_des.push([req.body.description]);
+ } else if (Array.isArray(req.body.description)) {
+   project_des.push(req.body.description);
+ }
+console.log("project_titles", project_titles);
+console.log("project_des", project_des);
+   if (project_titles[0].length > 0 || project_des[0].length > 0) {
+    for(var i =0; i < project_titles[0].length;i++){
+     var project = {
+       title: project_titles[0][i] || "",
+       description: project_des[0][i] || "",
+     };
+     console.log("project",project,i);
+     projects.push(project);
+    }
+  }
+   
+
+var experience = [];
+var job_titles = [];
+var job = [];
+if (typeof req.body.organization === "string") {
+  job_titles.push([req.body.organization]);
+} else if (Array.isArray(req.body.organization)) {
+  job_titles.push(req.body.organization);
+}
+if (typeof req.body.jobDesc === "string") {
+  job.push([req.body.jobDesc]);
+} else if (Array.isArray(req.body.jobDesc)) {
+  job.push(req.body.jobDesc);
+}
+console.log("job_titles",job_titles);
+console.log("job", job);
+ if (job_titles[0].length > 0 || job[0].length > 0) {
+  for (var i = 0; i < job_titles[0].length && i < job[0].length; i++) {
+   var exp = {
+     organization: job_titles[0][i] || "",
+     jobDesc: job[0][i] || "",
+   };
+   experience.push(exp);
+ }
+}
+console.log("projects: ",projects);
+console.log("Experience",experience);
+    pool.query(`select * from admin_personal_details where id=?`,[admin.email_id],function(err,result,fields){
+    if (err) {
+        return console.log(err);
+    }
+    else if(result.length == 0){
+      //console.log("result",result);
+       pool.query(`insert into admin_personal_details (id,firstname,lastname,dob,gender,email,phone,address)values (?,?,?,?,?,?,?,?)`,[admin.email_id, firstname,lastname,dob,gender,email,phone,address],function(err,result){
+      if(err){
+        return console.log(err);
+      }
+    });
+     pool.query(`insert into admin_ed_details (id,uni_name,univ_course,ug_board,univ_start_year,univ_end_year,univ_cgpa,clg_name,clg_course,clg_board,clg_start_year,clg_end_year,clg_cgpa,scl_name,yop,scl_cgpa,scl_board,skills,certi)values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[admin.email_id,uni_name,univ_course,ug_board,univ_start_year,univ_end_year,univ_cgpa,clg_name,clg_course,clg_board,clg_start_year,clg_end_year,clg_cgpa,scl_name,yop,scl_cgpa,scl_board,skills,certificates],function(err,result){
+      if(err){
+        return console.log(err);
+      }
+    }); 
+    // insert projects
+    pool.query(`insert into admin_projects (id, projects) values (?,?)`,[admin.email_id,JSON.stringify(projects)],function(err,result){
+      if(err){
+        return console.log(err);
+      }
+    }); 
+    //insert internships
+     pool.query(`insert into admin_experience (id, experience) values (?,?)`,
+       [admin.email_id, JSON.stringify(experience)],
+       function (err, result) {
+         if (err) {
+           return console.log(err);
+         }
+       }
+     ); 
+
+
+  }
+    else{
+      pool.query(`UPDATE admin_personal_details SET firstname=?, lastname=?, dob=?, gender=?, email=?, phone=?, address=? WHERE id=?`,[firstname,lastname,dob,gender,email,phone,address,admin.email_id],function(err,result){
+      if(err){
+        return console.log(err);
+      }
+    });
+      
+    pool.query(`UPDATE admin_ed_details SET uni_name=?, univ_course=?, ug_board=?, univ_start_year=?, univ_end_year=?, univ_cgpa=?, clg_name=?, clg_course=?, clg_board=?, clg_start_year=?, clg_end_year=?, clg_cgpa=?, scl_name=?, yop=?, scl_cgpa=?, scl_board=?, skills=?, certi=? WHERE id=?`,[uni_name,univ_course,ug_board,univ_start_year,univ_end_year,univ_cgpa,clg_name,clg_course,clg_board,clg_start_year,clg_end_year,clg_cgpa,scl_name,yop,scl_cgpa,scl_board,skills,certificates,admin.email_id],function(err,result){
+      if(err){
+        return console.log(err);
+      }
+    })
+
+     pool.query(`UPDATE admin_projects SET projects=? where id=?`,[JSON.stringify(projects),admin.email_id],function(err,result){
+      if(err){
+        return console.log(err);
+      }
+    }); 
+
+     pool.query(
+       `UPDATE admin_experience SET experience=? where id=?`,
+       [JSON.stringify(experience), admin.email_id],
+       function (err, result) {
+         if (err) {
+           return console.log(err);
+         }
+       }
+     ); 
+      
+    }
+})
+    setTimeout(() => {
+      res.redirect("/admin_profile");
+    }, 1000);
+});
+
   
 app.get('/search',function(req,res){
    if(!isAuthenticated){
@@ -399,7 +606,7 @@ function generatePDF(req, res) {
   // doc.end();
   // create a new PDF document
   const doc = new PDFDocument();
-
+  doc.lineGap(-2);
   //add some content to the PDF
   doc.fontSize(30).text(`${personal_data.firstname} ${personal_data.lastname}`, { align: 'center' });
   doc.fontSize(12).text(`Email: ${personal_data.email}`, { align: 'center' });
@@ -456,13 +663,13 @@ function generatePDF(req, res) {
    doc.fontSize(16).text('Skills', { underline: true });
   doc.moveDown();
   skill_list.forEach((skill, index) => {
-      doc.fontSize(10).text(`${skill}`);
+      doc.fontSize(10).text(`${skill.trim()}`);
       doc.moveDown();
     });
      doc.fontSize(16).text('Certificates', { underline: true });
   doc.moveDown();
   certi_list.forEach((certi, index) => {
-      doc.fontSize(10).text(`${certi}`);
+      doc.fontSize(10).text(`${certi.trim()}`);
       doc.moveDown();
     });
   
